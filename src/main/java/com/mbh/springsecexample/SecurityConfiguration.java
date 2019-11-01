@@ -3,6 +3,8 @@
  */
 package com.mbh.springsecexample;
 
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,7 +14,7 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Class that activates Spring Security. In this class the configuration is override.
+ * Class that activates Spring Security. In this class the configuration is overriden.
  * 
  * @author amineboufatah
  *
@@ -26,12 +28,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   /** User ROLE **/
   private static final String ROLE_USER = "USER";
 
+  @Autowired
+  private DataSource dataSource;
+
   /**
    * Configure the Authentication mechanism. We use an in memory authentication.
    */
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.inMemoryAuthentication() //
+    auth.jdbcAuthentication() //
+        .dataSource(dataSource)//
+        .withDefaultSchema()//
         .withUser("user").password("user").roles(ROLE_USER)//
         .and()//
         .withUser("admin").password("admin").roles(ROLE_ADMIN);
