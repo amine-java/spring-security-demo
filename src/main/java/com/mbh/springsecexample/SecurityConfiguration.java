@@ -1,10 +1,8 @@
-/**
- * 
- */
 package com.mbh.springsecexample;
 
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,8 +26,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   /** User ROLE **/
   private static final String ROLE_USER = "USER";
 
+  /** Inject Datasource **/
   @Autowired
   private DataSource dataSource;
+
+  /** Customized query for retrieving UserDetails **/
+  @Value("${query.sec.user}")
+  private String retrieveUserByEmailQuery;
+
+  /** Customized query for retrieving user's authorities **/
+  @Value("${query.sec.authorities}")
+  private String retrieveUserAuthorityQuery;
 
   /**
    * Configure the Authentication mechanism. We use an in memory authentication.
@@ -38,10 +45,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     auth.jdbcAuthentication() //
         .dataSource(dataSource)//
-        .withDefaultSchema()//
-        .withUser("user").password("user").roles(ROLE_USER)//
-        .and()//
-        .withUser("admin").password("admin").roles(ROLE_ADMIN);
+        .usersByUsernameQuery(retrieveUserByEmailQuery)//
+        .authoritiesByUsernameQuery(retrieveUserAuthorityQuery);
   }
 
   /**
